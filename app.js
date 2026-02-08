@@ -912,6 +912,7 @@ async function runAI(source) {
             throw new Error(errorData.error?.message || `HTTP ${res.status}: ${res.statusText}`);
         }
 
+        const data = await res.json();
         const reply = data.choices[0].message.content;
 
         // Increment message count
