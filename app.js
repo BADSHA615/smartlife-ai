@@ -1,4 +1,4 @@
-// SmartLife AI - Version 2.0.6
+// SmartLife AI - Version 2.0.7
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const API_KEY = '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';
 
@@ -727,7 +727,7 @@ function loadSettingsValues() {
 
     // Update version display if element exists
     const verEl = document.getElementById('appVersionDisplay');
-    if (verEl) verEl.innerText = 'v2.0.5 (Current)';
+    if (verEl) verEl.innerText = 'v2.0.7 (Current)';
 }
 
 function updateProfile() {
@@ -1009,7 +1009,7 @@ async function runAI(source) {
 }
 
 // --- Chat History ---
-function appendChat(text, sender) {
+function appendChat(text, sender, imageUrl = null) {
     const historyDiv = document.getElementById('chatHistory');
     const msgDiv = document.createElement('div');
     msgDiv.className = `message ${sender}`;
@@ -1017,9 +1017,51 @@ function appendChat(text, sender) {
     // Render Markdown for AI messages
     const content = sender === 'ai' ? marked.parse(text) : text;
 
-    msgDiv.innerHTML = `<div class="bubble">${content}</div>`;
+    let html = `<div class="bubble">`;
+    if (imageUrl) {
+        html += `<img src="${imageUrl}" class="chat-img" style="max-width: 100%; border-radius: 8px; margin-bottom: 0.5rem; display: block;">`;
+    }
+    html += `${content}</div>`;
+
+    msgDiv.innerHTML = html;
     historyDiv.appendChild(msgDiv);
     historyDiv.scrollTop = historyDiv.scrollHeight;
+}
+
+// --- Image Handling ---
+function triggerImageUpload() {
+    const input = document.getElementById('imageInput');
+    if (input) input.click();
+}
+
+function handleImageSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+        showToast('Image too large! Please use a smaller file (< 5MB).', 'error');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        selectedImageBase64 = e.target.result;
+        const preview = document.getElementById('imagePreview');
+        const container = document.getElementById('imagePreviewContainer');
+        if (preview && container) {
+            preview.src = selectedImageBase64;
+            container.style.display = 'block';
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
+function clearSelectedImage() {
+    selectedImageBase64 = null;
+    const input = document.getElementById('imageInput');
+    const container = document.getElementById('imagePreviewContainer');
+    if (input) input.value = '';
+    if (container) container.style.display = 'none';
 }
 
 function saveChatHistory(user, ai) {
