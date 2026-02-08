@@ -253,8 +253,14 @@
                         <div class="form-group">
                             <label>OpenRouter API Key</label>
                             <input type="password" id="settingsApiKey" placeholder="sk-or-...">
-                            <button class="secondary-btn" onclick="updateApiKey()">Save Key</button>
-                            <p class="text-xs text-muted">Key is stored locally in your browser.</p>
+                            <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                                <button class="secondary-btn" onclick="updateApiKey()" style="flex:1;">Save Key</button>
+                                <button class="danger-btn" onclick="resetApiKey()"
+                                    style="flex:1; background: rgba(255,100,100,0.1); border-color: var(--danger);">Reset
+                                    Default</button>
+                            </div>
+                            <p class="text-xs text-muted" style="margin-top: 0.5rem;">Key is stored locally in your
+                                browser.</p>
                         </div>
                     </div>
 
@@ -297,7 +303,7 @@
                     <!-- About Card -->
                     <div class="settings-card glass-panel">
                         <h3><i class="fa-solid fa-circle-info"></i> About</h3>
-                        <p>SmartLife AI v2.0</p>
+                        <p>SmartLife AI <span id="appVersionDisplay">v2.0.3</span></p>
                         <p class="text-sm text-muted">Developed by <b>BADSHA</b></p>
                         <div style="margin-top: 1rem;">
                             <a href="#" class="text-link">Privacy Policy</a> • <a href="#" class="text-link">Terms</a>

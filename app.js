@@ -1,4 +1,4 @@
-// SmartLife AI - Version 2.0.2
+// SmartLife AI - Version 2.0.3
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const API_KEY = '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';
 
@@ -705,7 +705,20 @@ function deleteUser(name) {
 // --- Settings Logic ---
 function loadSettingsValues() {
     document.getElementById('settingsName').value = currentUser || '';
-    document.getElementById('settingsApiKey').value = localStorage.getItem('custom_api_key') || API_KEY || '';
+
+    const customKey = localStorage.getItem('custom_api_key');
+    const input = document.getElementById('settingsApiKey');
+    if (customKey) {
+        input.value = customKey;
+        input.placeholder = "Loaded from browser storage";
+    } else {
+        input.value = "";
+        input.placeholder = "Using System Default Key";
+    }
+
+    // Update version display if element exists
+    const verEl = document.getElementById('appVersionDisplay');
+    if (verEl) verEl.innerText = 'v2.0.3 (Current)';
 }
 
 function updateProfile() {
@@ -732,8 +745,17 @@ function updateApiKey() {
     const key = document.getElementById('settingsApiKey').value.trim();
     if (key) {
         localStorage.setItem('custom_api_key', key);
-        alert('API Key saved securely in your browser.');
-        location.reload(); // Reload to apply new key
+        showToast('API Key saved securely in your browser.', 'success');
+        // No reload needed, just update effective key in next call
+    }
+}
+
+function resetApiKey() {
+    if (confirm('Reset to use the system default API key?')) {
+        localStorage.removeItem('custom_api_key');
+        document.getElementById('settingsApiKey').value = "";
+        document.getElementById('settingsApiKey').placeholder = "Using System Default Key";
+        showToast('Reset to default API key.', 'success');
     }
 }
 
@@ -871,7 +893,19 @@ async function runAI(source) {
         resultDiv.innerHTML = '<div class="loading"><i class="fa-solid fa-spinner fa-spin"></i> SmartLife is thinking...</div>';
     }
 
-    const effectiveKey = localStorage.getItem('custom_api_key') || API_KEY;
+    const effectiveKey = (localStorage.getItem('custom_api_key') || API_KEY || "").trim();
+
+    console.log('🤖 SmartLife Debug:');
+    console.log('- Source:', source);
+    console.log('- Role:', userRole);
+    console.log('- Usage:', messageCount, '/', userQuota);
+    console.log('- Key used:', effectiveKey === API_KEY ? 'DEFAULT_SYSTEM_KEY' : 'CUSTOM_USER_KEY');
+    console.log('- Key length:', effectiveKey.length);
+
+    if (!effectiveKey) {
+        showToast('❌ No API Key found. Please add one in Settings.', 'error');
+        return;
+    }
 
     // Build conversation history for context
     let messages = [{ role: 'system', content: systemMessage }];
