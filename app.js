@@ -1,3 +1,4 @@
+// SmartLife AI - Version 2.0.2
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const API_KEY = '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';
 
@@ -912,8 +913,11 @@ async function runAI(source) {
             throw new Error(errorData.error?.message || `HTTP ${res.status}: ${res.statusText}`);
         }
 
-        const data = await res.json();
-        const reply = data.choices[0].message.content;
+        const responseJson = await res.json();
+        if (!responseJson.choices || responseJson.choices.length === 0) {
+            throw new Error('API returned an empty response. Check your credits or model settings.');
+        }
+        const reply = responseJson.choices[0].message.content;
 
         // Increment message count
         const currentCount = parseInt(localStorage.getItem(`msg_count_${currentUser}`) || '0');
