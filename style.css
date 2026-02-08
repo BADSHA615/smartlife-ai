@@ -637,22 +637,108 @@ textarea {
     min-height: 100px;
 }
 
-/* Markdown Styles */
+/* Markdown Styles & Chat Formatting */
+.bubble,
+.markdown-body {
+    line-height: 1.6;
+    word-wrap: break-word;
+}
+
+.bubble h1,
+.bubble h2,
+.bubble h3,
 .markdown-body h1,
-.markdown-body h2 {
+.markdown-body h2,
+.markdown-body h3 {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+.bubble h1,
+.markdown-body h1 {
+    font-size: 1.4rem;
     border-bottom: 1px solid var(--glass-border);
-    padding-bottom: 0.3em;
-    margin-top: 1em;
+    padding-bottom: 0.3rem;
 }
 
-.markdown-body ul {
-    padding-left: 1.5em;
+.bubble h2,
+.markdown-body h2 {
+    font-size: 1.2rem;
 }
 
+.bubble h3,
+.markdown-body h3 {
+    font-size: 1.1rem;
+}
+
+.bubble p,
+.markdown-body p {
+    margin-bottom: 0.75rem;
+}
+
+.bubble ul,
+.bubble ol,
+.markdown-body ul,
+.markdown-body ol {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+}
+
+.bubble li,
+.markdown-body li {
+    margin-bottom: 0.25rem;
+}
+
+.bubble code,
 .markdown-body code {
-    background: rgba(0, 0, 0, 0.3);
-    padding: 0.2em 0.4em;
-    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 0.2rem 0.4rem;
+    border-radius: 6px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.9em;
+    color: var(--primary-color);
+}
+
+.bubble pre,
+.markdown-body pre {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 1rem;
+    border-radius: 12px;
+    overflow-x: auto;
+    margin-bottom: 1rem;
+    border: 1px solid var(--glass-border);
+}
+
+.bubble blockquote,
+.markdown-body blockquote {
+    border-left: 4px solid var(--accent-color);
+    padding-left: 1rem;
+    margin-left: 0;
+    font-style: italic;
+    color: var(--text-muted);
+}
+
+.bubble table,
+.markdown-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+}
+
+.bubble th,
+.bubble td,
+.markdown-body th,
+.markdown-body td {
+    border: 1px solid var(--glass-border);
+    padding: 0.5rem;
+    text-align: left;
+}
+
+.bubble th,
+.markdown-body th {
+    background: rgba(255, 255, 255, 0.05);
 }
 
 /* --- Settings View --- */

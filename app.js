@@ -81,9 +81,17 @@ const MODULES = {
             { id: 'problem', label: 'Main Distraction', type: 'text', placeholder: 'e.g. Instagram Reels, Gaming' },
             { id: 'goal', label: 'Goal', type: 'select', options: ['Reduce Screen Time', 'Focus Detox', 'Sleep Better'] }
         ],
-        systemPrompt: "You are a Digital Wellbeing Coach. Create a strict but doable plan to reduce screen time. Suggest alternative offline activities."
+        systemPrompt: "You are a Digital Wellbeing Coach. Create a strict but doable plan to reduce screen time. Suggest alternative offline activities. Use clear headers and bullet points."
     }
 };
+
+const MASTER_SYSTEM_PROMPT = `You are SmartLife AI, a premium and highly helpful personal assistant. 
+Follow these formatting rules for every single response:
+1. **Be Structured**: Use Markdown headers (###) for distinct topics.
+2. **Be Visual**: Use bullet points and numbered lists for better readability.
+3. **Be Concise**: Keep paragraphs short and avoid long walls of text.
+4. **Be Helpful**: Always provide actionable advice or clear steps.
+5. **Language**: Respond in a friendly mix of Bangla and English (Banglish) where appropriate, especially for motivational parts.`;
 
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -863,7 +871,7 @@ async function runAI(source) {
     }
 
     let userMessage = '';
-    let systemMessage = 'You are a helpful AI Assistant called SmartLife AI.';
+    let systemMessage = MASTER_SYSTEM_PROMPT;
     const resultDiv = source === 'module' ? document.getElementById('resultContent') : null;
 
     if (source === 'general') {
@@ -878,7 +886,7 @@ async function runAI(source) {
     else if (source === 'module') {
         const config = MODULES[currentModule];
         if (!config) return;
-        systemMessage = config.systemPrompt;
+        systemMessage = config.systemPrompt + "\n\n" + MASTER_SYSTEM_PROMPT;
 
         // Gather inputs
         const inputs = [];
@@ -988,7 +996,11 @@ function appendChat(text, sender) {
     const historyDiv = document.getElementById('chatHistory');
     const msgDiv = document.createElement('div');
     msgDiv.className = `message ${sender}`;
-    msgDiv.innerHTML = `<div class="bubble">${text}</div>`;
+
+    // Render Markdown for AI messages
+    const content = sender === 'ai' ? marked.parse(text) : text;
+
+    msgDiv.innerHTML = `<div class="bubble">${content}</div>`;
     historyDiv.appendChild(msgDiv);
     historyDiv.scrollTop = historyDiv.scrollHeight;
 }
