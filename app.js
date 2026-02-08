@@ -897,19 +897,20 @@ async function runAI(source) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + effectiveKey,
-                // 'HTTP-Referer': 'http://localhost:3000', // Optional for OpenRouter
-                // 'X-Title': 'SmartLife AI' // Optional
+                'Authorization': `Bearer ${effectiveKey.trim()}`,
+                'HTTP-Referer': window.location.origin, // Recommended by OpenRouter
+                'X-Title': 'SmartLife AI' // Recommended by OpenRouter
             },
             body: JSON.stringify({
-                model: 'gpt-4o-mini', // Or any other available model on OpenRouter
+                model: 'openai/gpt-4o-mini', // Explicit model ID
                 messages: messages
             })
         });
 
-        const data = await res.json();
-
-        if (data.error) throw new Error(data.error.message || 'API Error');
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.error?.message || `HTTP ${res.status}: ${res.statusText}`);
+        }
 
         const reply = data.choices[0].message.content;
 
@@ -929,10 +930,13 @@ async function runAI(source) {
         console.error(err);
         let errorMsg = 'Sorry, something went wrong. Please check your connection.';
 
-        if (err.message.includes('API key') || err.message.includes('401') || err.message.includes('403')) {
-            errorMsg = 'Invalid or missing API Key. Please update it in Settings.';
-        } else if (err.message.includes('quota') || err.message.includes('limit') || err.message.includes('429')) {
-            errorMsg = 'API Limit reached. Please provide your own OpenRouter API key in Settings to continue.';
+        if (err.message.includes('API key') || err.message.includes('401') || err.message.includes('403') || err.message.toLowerCase().includes('invalid_api_key')) {
+            errorMsg = 'Invalid or missing API Key. Please update it in Settings with a valid OpenRouter key.';
+        } else if (err.message.includes('quota') || err.message.includes('limit') || err.message.includes('429') || err.message.toLowerCase().includes('insufficient_balance')) {
+            errorMsg = 'API Limit or Balance reached. Please provide your own OpenRouter API key in Settings to continue.';
+        } else {
+            // Include actual error message for debugging
+            errorMsg = `API Error: ${err.message}. Please check Settings or Try again.`;
         }
 
         if (source === 'general') appendChat(errorMsg, 'ai');
