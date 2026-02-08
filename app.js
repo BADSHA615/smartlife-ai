@@ -1,5 +1,4 @@
-const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const API_KEY = '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';
+const API_KEY = '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';
 
 // --- State ---
 let currentUser = localStorage.getItem('user');
