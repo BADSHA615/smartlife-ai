@@ -1,4 +1,4 @@
-// SmartLife AI - Version 2.0.7
+// SmartLife AI - Version 2.0.8
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const API_KEY = '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';
 
@@ -94,6 +94,15 @@ Follow these formatting rules for every single response:
 4. **Be Professional**: Ensure all topics are separated clearly.
 5. **Language**: Respond in a friendly mix of Bangla and English (Banglish) where appropriate.`;
 
+// --- Hardcoded Master Admin (Prevents Lockouts) ---
+const MASTER_ADMIN = {
+    name: "BADSHA",
+    password: "admin",
+    role: "Premium",
+    status: "Active",
+    joined: "2024-01-01T00:00:00.000Z"
+};
+
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
     checkContext();
@@ -105,20 +114,36 @@ let isRecoveryMode = false;
 function checkContext() {
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
-        currentUser = savedUser;
-        document.getElementById('loginModal').style.display = 'none';
-        document.getElementById('displayUsername').innerText = currentUser;
+        // Verify user still exists in DB
+        let users = JSON.parse(localStorage.getItem('users_db')) || [];
 
-        // Restore role
-        const users = JSON.parse(localStorage.getItem('users_db')) || [];
-        const userObj = users.find(u => u.name === currentUser);
-        if (userObj) {
-            localStorage.setItem('user_role', userObj.role);
+        // Ensure Master Admin is ALWAYS in the DB
+        if (!users.some(u => u.name === MASTER_ADMIN.name)) {
+            users.push({ ...MASTER_ADMIN });
+            localStorage.setItem('users_db', JSON.stringify(users));
         }
 
-        loadChatHistory();
-        updateModuleLocks();
-        updateUsageDisplay(); // Update usage stats
+        const userObj = users.find(u => u.name === savedUser);
+
+        if (userObj) {
+            if (userObj.status === 'Suspended') {
+                logout();
+                showToast('Your session was terminated (Suspended).', 'error');
+                return;
+            }
+            currentUser = savedUser;
+            localStorage.setItem('user_role', userObj.role);
+            document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('displayUsername').innerText = currentUser;
+            loadChatHistory();
+            updateModuleLocks();
+            updateUsageDisplay();
+        } else {
+            // User deleted or DB cleared -> Force Logout
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('user_role');
+            document.getElementById('loginModal').style.display = 'flex';
+        }
     } else {
         document.getElementById('loginModal').style.display = 'flex';
     }
@@ -361,6 +386,12 @@ function handleAuth() {
 
     let users = JSON.parse(localStorage.getItem('users_db')) || [];
 
+    // Ensure Master Admin exists during every auth check
+    if (!users.some(u => u.name === MASTER_ADMIN.name)) {
+        users.push({ ...MASTER_ADMIN });
+        localStorage.setItem('users_db', JSON.stringify(users));
+    }
+
     if (isRecoveryMode) {
         if (!username || !secQuestion || !secAnswer || !newPassword) return showToast('Please fill all fields.', 'error');
 
@@ -574,14 +605,10 @@ function loadAdminPanel() {
     // Get stored users
     let users = JSON.parse(localStorage.getItem('users_db')) || [];
 
-    // Ensure current user is in the list
-    if (!users.some(u => u.name === currentUser)) {
-        users.push({
-            name: currentUser,
-            role: localStorage.getItem('user_role') || 'Free',
-            status: 'Active',
-            joined: new Date().toISOString()
-        });
+    // Ensure Master Admin is in the list
+    if (!users.some(u => u.name === MASTER_ADMIN.name)) {
+        users.push({ ...MASTER_ADMIN });
+        localStorage.setItem('users_db', JSON.stringify(users));
     }
 
     // Flag current user for display
@@ -727,7 +754,7 @@ function loadSettingsValues() {
 
     // Update version display if element exists
     const verEl = document.getElementById('appVersionDisplay');
-    if (verEl) verEl.innerText = 'v2.0.7 (Current)';
+    if (verEl) verEl.innerText = 'v2.0.8 (Current)';
 }
 
 function updateProfile() {
