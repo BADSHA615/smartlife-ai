@@ -1,10 +1,11 @@
-// SmartLife AI - Version 2.0.5
+// SmartLife AI - Version 2.0.6
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const API_KEY = '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';
 
 // --- State ---
 let currentUser = localStorage.getItem('user');
 let currentModule = 'dashboard';
+let selectedImageBase64 = null; // Stores image for Vision API
 
 // --- Module Configuration ---
 const MODULES = {
@@ -872,6 +873,10 @@ async function runAI(source) {
 
     let userMessage = '';
     let systemMessage = MASTER_SYSTEM_PROMPT;
+    const currentImage = selectedImageBase64; // Capture current state
+
+    // Clear image from UI immediately
+    clearSelectedImage();
     const resultDiv = source === 'module' ? document.getElementById('resultContent') : null;
 
     if (source === 'general') {
@@ -880,7 +885,7 @@ async function runAI(source) {
         if (!userMessage) return;
 
         // Append User Message to Chat
-        appendChat(userMessage, 'user');
+        appendChat(userMessage, 'user', currentImage);
         input.value = '';
     }
     else if (source === 'module') {
@@ -933,6 +938,18 @@ async function runAI(source) {
     } else {
         // For modules, just send the current request
         messages.push({ role: 'user', content: userMessage });
+    }
+
+    // Convert last message to multi-modal if image exists
+    if (currentImage) {
+        const lastMsg = messages[messages.length - 1];
+        lastMsg.content = [
+            { type: "text", text: lastMsg.content },
+            {
+                type: "image_url",
+                image_url: { url: currentImage }
+            }
+        ];
     }
 
     try {

@@ -199,8 +199,17 @@
                                 here.</div>
                         </div>
                     </div>
+                    <div id="imagePreviewContainer" class="image-preview-container" style="display: none;">
+                        <img id="imagePreview" src="" alt="Selected Image">
+                        <button onclick="clearSelectedImage()" class="clear-img-btn"><i
+                                class="fa-solid fa-xmark"></i></button>
+                    </div>
                     <div class="chat-input-area">
-                        <input type="text" id="mainInput" placeholder="Type a message..."
+                        <input type="file" id="imageInput" accept="image/*" style="display: none;"
+                            onchange="handleImageSelect(event)">
+                        <button onclick="triggerImageUpload()" class="icon-btn-chat" title="Upload Image"><i
+                                class="fa-solid fa-camera"></i></button>
+                        <input type="text" id="mainInput" placeholder="Type a message or ask about an image..."
                             onkeypress="handleEnter(event)">
                         <button onclick="runAI('general')"><i class="fa-solid fa-paper-plane"></i></button>
                     </div>

@@ -589,6 +589,56 @@ option {
     border-radius: 10px;
     color: white;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.chat-input-area button:hover {
+    background: var(--accent-color);
+}
+
+.icon-btn-chat {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: var(--text-main) !important;
+}
+
+.icon-btn-chat:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+}
+
+.image-preview-container {
+    position: relative;
+    display: inline-block;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    margin-bottom: 0.5rem;
+    border: 1px solid var(--glass-border);
+}
+
+.image-preview-container img {
+    max-height: 80px;
+    border-radius: 8px;
+    display: block;
+}
+
+.clear-img-btn {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 20px !important;
+    height: 20px !important;
+    border-radius: 50% !important;
+    background: var(--danger) !important;
+    color: white;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
 }
 
 /* --- Module View --- */
