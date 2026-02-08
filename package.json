@@ -1,0 +1,16 @@
+{
+  "name": "smartlife-ai",
+  "version": "2.0.0",
+  "description": "Smart Life AI - Your Personal Genius Assistant",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["ai", "assistant", "smartlife"],
+  "author": "BADSHA",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

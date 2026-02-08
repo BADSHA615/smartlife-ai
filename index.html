@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Life AI | Your Personal Genius</title>
+    <!-- Modern Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar glass-panel">
+            <div class="logo">
+                <i class="fa-solid fa-brain"></i>
+                <span>SmartLife AI</span>
+            </div>
+
+            <div class="menu-items">
+                <div class="menu-category">MAIN</div>
+                <button class="menu-btn active" onclick="switchModule('dashboard')">
+                    <i class="fa-solid fa-house"></i> Dashboard
+                </button>
+
+                <div class="menu-category">MODULES</div>
+                <button class="menu-btn" onclick="switchModule('life')">
+                    <i class="fa-solid fa-leaf"></i> Life & Mind
+                </button>
+                <button class="menu-btn" onclick="switchModule('fashion')">
+                    <i class="fa-solid fa-shirt"></i> Fashion
+                </button>
+                <button class="menu-btn" onclick="switchModule('study')">
+                    <i class="fa-solid fa-graduation-cap"></i> Study
+                </button>
+                <button class="menu-btn" onclick="switchModule('relationship')">
+                    <i class="fa-solid fa-heart"></i> Relationship
+                </button>
+                <button class="menu-btn" onclick="switchModule('food')">
+                    <i class="fa-solid fa-utensils"></i> Food & Health
+                </button>
+                <button class="menu-btn" onclick="switchModule('business')">
+                    <i class="fa-solid fa-briefcase"></i> Business
+                </button>
+                <button class="menu-btn" onclick="switchModule('wellbeing')">
+                    <i class="fa-solid fa-mobile-screen"></i> Wellbeing
+                </button>
+
+                <div class="menu-category">SYSTEM</div>
+                <button class="menu-btn" onclick="switchModule('admin')">
+                    <i class="fa-solid fa-users-gear"></i> Admin Panel
+                </button>
+                <button class="menu-btn" onclick="switchModule('settings')">
+                    <i class="fa-solid fa-gear"></i> Settings
+                </button>
+                <button class="menu-btn logout-btn" onclick="logout()">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
+            </div>
+
+            <div class="sidebar-footer">
+                <p>Developed by <span class="developer-name">BADSHA</span></p>
+            </div>
+        </nav>
+
+        <!-- Sidebar Overlay (Mobile) -->
+        <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="top-bar glass-panel">
+                <button id="mobileMenuBtn" class="mobile-menu-btn" onclick="toggleSidebar()">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="user-welcome">
+                    <span>Welcome back, <b id="displayUsername">User</b> 👋</span>
+                </div>
+                <div class="status-indicator">
+                    <span class="dot"></span> Online
+                </div>
+            </header>
+
+            <!-- Dynamic Content Area -->
+            <div id="contentArea" class="content-wrapper">
+                <!-- Login Modal (Overlay) -->
+                <div id="loginModal" class="modal-overlay glass-panel">
+                    <div class="login-box">
+                        <h2 id="authTitle">Welcome Back</h2>
+                        <p id="authDesc">Login to continue your journey</p>
+
+                        <div class="form-group">
+                            <input type="text" id="usernameInput" placeholder="Username">
+                            <input type="password" id="passwordInput" placeholder="Password">
+
+                            <!-- Security Fields (Hidden by default) -->
+                            <div id="securityFields" style="display: none;">
+                                <select id="securityQuestion" class="module-input"
+                                    style="margin-bottom: 1rem; width: 100%; padding: 1rem; background: rgba(0,0,0,0.3); color: var(--text-main); border-radius: 12px; border: 1px solid var(--glass-border);">
+                                    <option value="" disabled selected>Select a Security Question</option>
+                                    <option value="pet">What was the name of your first pet?</option>
+                                    <option value="school">What was your first school?</option>
+                                    <option value="city">In which city were you born?</option>
+                                </select>
+                                <input type="text" id="securityAnswer" placeholder="Your Answer">
+                            </div>
+
+                            <!-- New Password Field (For Recovery) -->
+                            <input type="password" id="newPasswordInput" placeholder="New Password"
+                                style="display: none;">
+                        </div>
+
+                        <button class="primary-btn" onclick="handleAuth()" id="authBtn">Login <i
+                                class="fa-solid fa-arrow-right"></i></button>
+
+                        <div class="auth-links"
+                            style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                            <p class="text-sm">
+                                <span id="authSwitchText">New here?</span>
+                                <a href="#" onclick="toggleAuthMode()" class="text-link" id="authSwitchLink">Create
+                                    Account</a>
+                            </p>
+                            <a href="#" onclick="toggleRecoveryMode()" class="text-link text-sm"
+                                id="forgotPasswordLink">Forgot Password?</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Toast Notification Container -->
+                <div id="toast-container" class="toast-container"></div>
+            </div>
+
+            <!-- Default Dashboard View -->
+            <div id="dashboardView" class="view-section active">
+                <div class="hero-card glass-panel">
+                    <h1>How can I help you today?</h1>
+                    <p>Select a module from the sidebar to verify your life.</p>
+                </div>
+
+                <div class="quick-stats">
+                    <div class="stat-card glass-panel">
+                        <i class="fa-solid fa-list-check"></i>
+                        <h3>Tasks</h3>
+                        <p>0 Pending</p>
+                    </div>
+                    <div class="stat-card glass-panel">
+                        <i class="fa-solid fa-fire"></i>
+                        <h3>Streak</h3>
+                        <p>1 Day</p>
+                    </div>
+                    <div class="stat-card glass-panel">
+                        <i class="fa-solid fa-star"></i>
+                        <h3 id="userTierDisplay">Free</h3>
+                        <p>Your Plan</p>
+                    </div>
+                    <div class="stat-card glass-panel">
+                        <i class="fa-solid fa-message"></i>
+                        <h3 id="messageUsageDisplay">0/20</h3>
+                        <p>Messages Used</p>
+                    </div>
+                </div>
+
+                <div class="chat-interface glass-panel">
+                    <div class="chat-header">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>Quick Chat</span>
+                        <div style="margin-left: auto; display: flex; gap: 0.5rem;">
+                            <button onclick="newChat()" class="icon-btn" title="New Chat">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                            <button onclick="toggleChatHistory()" class="icon-btn" title="Chat History">
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Chat History Sidebar -->
+                    <div id="chatHistorySidebar" class="chat-history-sidebar">
+                        <div class="history-header">
+                            <h3>Chat History</h3>
+                            <button onclick="toggleChatHistory()" class="icon-btn">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                        <div id="savedChatsList" class="saved-chats-list">
+                            <!-- Saved chats will be rendered here -->
+                        </div>
+                    </div>
+
+                    <div id="chatHistory" class="chat-history">
+                        <!-- Messages go here -->
+                        <div class="message ai">
+                            <div class="bubble">Hello! I'm SmartLife AI. Choose a specific module or ask me anything
+                                here.</div>
+                        </div>
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" id="mainInput" placeholder="Type a message..."
+                            onkeypress="handleEnter(event)">
+                        <button onclick="runAI('general')"><i class="fa-solid fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dynamic Module View (Template for other modules) -->
+            <div id="moduleView" class="view-section" style="display: none;">
+                <div class="module-header glass-panel">
+                    <h2 id="moduleTitle">Module Name</h2>
+                    <p id="moduleDesc">Module Description</p>
+                </div>
+
+                <div class="module-content">
+                    <!-- Specific inputs will be injected here via JS -->
+                    <div id="moduleInputs" class="input-group glass-panel">
+                        <!-- Dynamic Inputs -->
+                    </div>
+
+                    <div id="moduleOutput" class="output-area glass-panel">
+                        <h3><i class="fa-solid fa-align-left"></i> Results</h3>
+                        <div id="resultContent" class="markdown-body">
+                            <!-- AI Output -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings View -->
+            <div id="settingsView" class="view-section" style="display: none;">
+                <div class="module-header glass-panel">
+                    <h2>Settings</h2>
+                    <p>Manage your account and app preferences.</p>
+                </div>
+
+                <div class="settings-grid">
+                    <!-- Profile Card -->
+                    <div class="settings-card glass-panel">
+                        <h3><i class="fa-solid fa-user"></i> Profile</h3>
+                        <div class="form-group">
+                            <label>Your Name</label>
+                            <input type="text" id="settingsName" placeholder="Enter name">
+                            <button class="secondary-btn" onclick="updateProfile()">Update Name</button>
+                        </div>
+                    </div>
+
+                    <!-- API Key Card -->
+                    <div class="settings-card glass-panel">
+                        <h3><i class="fa-solid fa-key"></i> API Configuration</h3>
+                        <div class="form-group">
+                            <label>OpenRouter API Key</label>
+                            <input type="password" id="settingsApiKey" placeholder="sk-or-...">
+                            <button class="secondary-btn" onclick="updateApiKey()">Save Key</button>
+                            <p class="text-xs text-muted">Key is stored locally in your browser.</p>
+                        </div>
+                    </div>
+
+                    <!-- Data Management Card -->
+                    <div class="settings-card glass-panel">
+                        <h3><i class="fa-solid fa-database"></i> Data Management</h3>
+                        <div class="action-buttons">
+                            <button class="danger-btn" onclick="clearChatHistory()">
+                                <i class="fa-solid fa-trash"></i> Clear Chat History
+                            </button>
+                            <button class="danger-btn" onclick="factoryReset()">
+                                <i class="fa-solid fa-skull"></i> Factory Reset
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Upgrade Card -->
+                    <div class="settings-card glass-panel">
+                        <h3><i class="fa-solid fa-crown"></i> Upgrade to Premium</h3>
+                        <p class="text-sm text-muted">Unlock unlimited messages and all premium features!</p>
+                        <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                            <div class="upgrade-feature">
+                                <i class="fa-solid fa-check" style="color: var(--success);"></i>
+                                <span>Unlimited AI Messages</span>
+                            </div>
+                            <div class="upgrade-feature">
+                                <i class="fa-solid fa-check" style="color: var(--success);"></i>
+                                <span>Access to All Modules</span>
+                            </div>
+                            <div class="upgrade-feature">
+                                <i class="fa-solid fa-check" style="color: var(--success);"></i>
+                                <span>Priority Support</span>
+                            </div>
+                        </div>
+                        <button class="primary-btn" onclick="contactDeveloper()" style="margin-top: 1rem; width: 100%;">
+                            <i class="fa-solid fa-envelope"></i> Contact Developer
+                        </button>
+                    </div>
+
+                    <!-- About Card -->
+                    <div class="settings-card glass-panel">
+                        <h3><i class="fa-solid fa-circle-info"></i> About</h3>
+                        <p>SmartLife AI v2.0</p>
+                        <p class="text-sm text-muted">Developed by <b>BADSHA</b></p>
+                        <div style="margin-top: 1rem;">
+                            <a href="#" class="text-link">Privacy Policy</a> • <a href="#" class="text-link">Terms</a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Admin Panel View -->
+            <div id="adminView" class="view-section" style="display: none;">
+                <div class="module-header glass-panel">
+                    <h2>Admin Panel</h2>
+                    <p>Manage users and subscription tiers.</p>
+                </div>
+
+                <!-- Admin Statistics -->
+                <div class="admin-stats">
+                    <div class="stat-card glass-panel">
+                        <i class="fa-solid fa-users"></i>
+                        <h3 id="statTotalUsers">0</h3>
+                        <p>Total Users</p>
+                    </div>
+                    <div class="stat-card glass-panel">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <h3 id="statActiveUsers">0</h3>
+                        <p>Active</p>
+                    </div>
+                    <div class="stat-card glass-panel">
+                        <i class="fa-solid fa-ban"></i>
+                        <h3 id="statSuspendedUsers">0</h3>
+                        <p>Suspended</p>
+                    </div>
+                    <div class="stat-card glass-panel">
+                        <i class="fa-solid fa-crown"></i>
+                        <h3 id="statPremiumUsers">0</h3>
+                        <p>Premium</p>
+                    </div>
+                </div>
+
+                <!-- User Management -->
+                <div class="glass-panel" style="padding: 1.5rem;">
+                    <!-- Search Bar -->
+                    <div class="admin-search" style="margin-bottom: 1.5rem;">
+                        <input type="text" id="userSearchInput" placeholder="Search users by name or role..."
+                            onkeyup="filterUsers()" class="module-input" style="width: 100%; padding: 0.75rem;">
+                    </div>
+
+                    <table class="user-table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody">
+                            <!-- User Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+    </div>
+
+    </div>
+    </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
