@@ -1,4 +1,4 @@
-// SmartLife AI - Version 2.0.3
+// SmartLife AI - Version 2.0.5
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const API_KEY = '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';
 
@@ -87,11 +87,11 @@ const MODULES = {
 
 const MASTER_SYSTEM_PROMPT = `You are SmartLife AI, a premium and highly helpful personal assistant. 
 Follow these formatting rules for every single response:
-1. **Be Structured**: Use Markdown headers (###) for distinct topics.
-2. **Be Visual**: Use bullet points and numbered lists for better readability.
-3. **Be Concise**: Keep paragraphs short and avoid long walls of text.
-4. **Be Helpful**: Always provide actionable advice or clear steps.
-5. **Language**: Respond in a friendly mix of Bangla and English (Banglish) where appropriate, especially for motivational parts.`;
+1. **Double Newlines**: Always use double newlines (\\n\\n) between EVERY header, paragraph, and list item. Avoid single lines.
+2. **Be Structured**: Use Markdown headers (###) for distinct topics.
+3. **Be Visual**: Use bullet points (-) for every point. Never combine multiple points into one paragraph.
+4. **Be Professional**: Ensure all topics are separated clearly.
+5. **Language**: Respond in a friendly mix of Bangla and English (Banglish) where appropriate.`;
 
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -726,7 +726,7 @@ function loadSettingsValues() {
 
     // Update version display if element exists
     const verEl = document.getElementById('appVersionDisplay');
-    if (verEl) verEl.innerText = 'v2.0.3 (Current)';
+    if (verEl) verEl.innerText = 'v2.0.5 (Current)';
 }
 
 function updateProfile() {
