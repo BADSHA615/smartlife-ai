@@ -710,10 +710,20 @@ function loadSettingsValues() {
 function updateProfile() {
     const name = document.getElementById('settingsName').value.trim();
     if (name) {
+        const oldName = currentUser;
         currentUser = name;
-        localStorage.setItem('user', name);
+        localStorage.setItem('currentUser', name);
         document.getElementById('displayUsername').innerText = name;
-        alert('Profile updated successfully!');
+
+        // Also update users_db if it exists
+        let users = JSON.parse(localStorage.getItem('users_db')) || [];
+        const userIndex = users.findIndex(u => u.name === oldName);
+        if (userIndex !== -1) {
+            users[userIndex].name = name;
+            localStorage.setItem('users_db', JSON.stringify(users));
+        }
+
+        showToast('Profile updated successfully!', 'success');
     }
 }
 
@@ -917,7 +927,14 @@ async function runAI(source) {
 
     } catch (err) {
         console.error(err);
-        const errorMsg = 'Sorry, something went wrong. Please check your connection or API Key.';
+        let errorMsg = 'Sorry, something went wrong. Please check your connection.';
+
+        if (err.message.includes('API key') || err.message.includes('401') || err.message.includes('403')) {
+            errorMsg = 'Invalid or missing API Key. Please update it in Settings.';
+        } else if (err.message.includes('quota') || err.message.includes('limit') || err.message.includes('429')) {
+            errorMsg = 'API Limit reached. Please provide your own OpenRouter API key in Settings to continue.';
+        }
+
         if (source === 'general') appendChat(errorMsg, 'ai');
         else resultDiv.innerHTML = `<p style="color: var(--danger)">${errorMsg}</p>`;
     }
