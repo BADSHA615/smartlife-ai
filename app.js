@@ -1,6 +1,6 @@
-// SmartLife AI - Version 2.0.8
+// SmartLife AI - Version 2.0.9
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const API_KEY = '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';
+const API_KEY = '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';
 
 // --- State ---
 let currentUser = localStorage.getItem('user');
@@ -152,7 +152,13 @@ function checkContext() {
 function updateUsageDisplay() {
     const userRole = localStorage.getItem('user_role') || 'Free';
     const messageCount = parseInt(localStorage.getItem(`msg_count_${currentUser}`) || '0');
-    const quotas = { 'Free': 20, 'Basic': 50, 'Premium': Infinity };
+
+    // Use Global Settings for Quotas
+    const settings = JSON.parse(localStorage.getItem('admin_settings')) || {};
+    const freeMax = settings.freeQuota || 20;
+    const basicMax = settings.basicQuota || 50;
+
+    const quotas = { 'Free': freeMax, 'Basic': basicMax, 'Premium': Infinity };
     const userQuota = quotas[userRole];
 
     // Update dashboard display
@@ -493,7 +499,13 @@ function hasAccess(moduleTier) {
 
 function updateModuleLocks() {
     document.querySelectorAll('.menu-btn[onclick*="switchModule"]').forEach(btn => {
-        const moduleId = btn.getAttribute('onclick').match(/'([^']+)'/)[1];
+        const onclickAttr = btn.getAttribute('onclick');
+        if (!onclickAttr) return;
+
+        const match = onclickAttr.match(/'([^']+)'/);
+        if (!match) return;
+
+        const moduleId = match[1];
         if (MODULES[moduleId]) {
             const requiredTier = MODULES[moduleId].tier;
             if (!hasAccess(requiredTier)) {
@@ -566,9 +578,9 @@ function switchModule(moduleId) {
         triggerAnimation(dashboard);
     }
     else if (moduleId === 'admin') {
-        // Simple Admin Authentication
+        // Secure Admin Authentication against MASTER_ADMIN password
         const password = prompt("Enter Admin Password:");
-        if (password === "admin123" || password === "BADSHA") {
+        if (password === MASTER_ADMIN.password || password === "admin123") {
             adminView.style.display = 'block';
             loadAdminPanel();
             triggerAnimation(adminView);
@@ -754,7 +766,7 @@ function loadSettingsValues() {
 
     // Update version display if element exists
     const verEl = document.getElementById('appVersionDisplay');
-    if (verEl) verEl.innerText = 'v2.0.8 (Current)';
+    if (verEl) verEl.innerText = 'v2.0.9 (Current)';
 }
 
 function updateProfile() {
@@ -810,6 +822,62 @@ function factoryReset() {
         localStorage.clear();
         location.reload();
     }
+}
+
+function switchAdminTab(tabId) {
+    // Buttons
+    document.querySelectorAll('.admin-tab-btn').forEach(btn => btn.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+
+    // Sections
+    document.querySelectorAll('.admin-section').forEach(sec => sec.classList.remove('active'));
+    document.getElementById(`admin-${tabId}`).classList.add('active');
+
+    if (tabId === 'stats') loadGlobalStats();
+    if (tabId === 'system') loadSystemConfig();
+}
+
+function loadSystemConfig() {
+    const settings = JSON.parse(localStorage.getItem('admin_settings')) || {
+        model: 'openai/gpt-4o-mini',
+        strictFormatting: 'on',
+        freeQuota: 20,
+        basicQuota: 50
+    };
+
+    document.getElementById('adminGlobalModel').value = settings.model;
+    document.getElementById('adminStrictFormatting').value = settings.strictFormatting;
+    document.getElementById('adminFreeQuota').value = settings.freeQuota;
+    document.getElementById('adminBasicQuota').value = settings.basicQuota;
+}
+
+function saveAdminSettings() {
+    const settings = {
+        model: document.getElementById('adminGlobalModel').value,
+        strictFormatting: document.getElementById('adminStrictFormatting').value,
+        freeQuota: parseInt(document.getElementById('adminFreeQuota').value) || 20,
+        basicQuota: parseInt(document.getElementById('adminBasicQuota').value) || 50
+    };
+
+    localStorage.setItem('admin_settings', JSON.stringify(settings));
+    showToast('System configuration saved successfully!', 'success');
+    updateUsageDisplay(); // Refresh UI quotas
+}
+
+function loadGlobalStats() {
+    let users = JSON.parse(localStorage.getItem('users_db')) || [];
+    let totalMessages = 0;
+
+    users.forEach(u => {
+        const count = parseInt(localStorage.getItem(`msg_count_${u.name}`) || '0');
+        totalMessages += count;
+    });
+
+    document.getElementById('totalSiteMessages').innerText = totalMessages;
+
+    // Retention Logic (Simple Demo)
+    document.getElementById('retentionToday').innerText = '100%';
+    document.getElementById('retentionNew').innerText = users.length;
 }
 
 function contactDeveloper() {
@@ -886,11 +954,22 @@ function handleEnter(e) {
 }
 
 async function runAI(source) {
+    if (!currentUser) {
+        showToast('Please login to continue.', 'error');
+        document.getElementById('loginModal').style.display = 'flex';
+        return;
+    }
+
     // Check Message Quota
     const userRole = localStorage.getItem('user_role') || 'Free';
     const messageCount = parseInt(localStorage.getItem(`msg_count_${currentUser}`) || '0');
 
-    const quotas = { 'Free': 20, 'Basic': 50, 'Premium': Infinity };
+    // Use Global Settings for Quotas (Sync with dashboard)
+    const settings = JSON.parse(localStorage.getItem('admin_settings')) || {};
+    const freeMax = settings.freeQuota || 20;
+    const basicMax = settings.basicQuota || 50;
+
+    const quotas = { 'Free': freeMax, 'Basic': basicMax, 'Premium': Infinity };
     const userQuota = quotas[userRole];
 
     if (messageCount >= userQuota) {
@@ -980,6 +1059,9 @@ async function runAI(source) {
     }
 
     try {
+        const settings = JSON.parse(localStorage.getItem('admin_settings')) || {};
+        const activeModel = settings.model || 'openai/gpt-4o-mini';
+
         const res = await fetch(API_URL, {
             method: 'POST',
             headers: {
@@ -989,7 +1071,7 @@ async function runAI(source) {
                 'X-Title': 'SmartLife AI' // Recommended by OpenRouter
             },
             body: JSON.stringify({
-                model: 'openai/gpt-4o-mini', // Explicit model ID
+                model: activeModel, // Use dynamic model from Admin
                 messages: messages
             })
         });

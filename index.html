@@ -325,61 +325,154 @@
             <!-- Admin Panel View -->
             <div id="adminView" class="view-section" style="display: none;">
                 <div class="module-header glass-panel">
-                    <h2>Admin Panel</h2>
-                    <p>Manage users and subscription tiers.</p>
-                </div>
-
-                <!-- Admin Statistics -->
-                <div class="admin-stats">
-                    <div class="stat-card glass-panel">
-                        <i class="fa-solid fa-users"></i>
-                        <h3 id="statTotalUsers">0</h3>
-                        <p>Total Users</p>
-                    </div>
-                    <div class="stat-card glass-panel">
-                        <i class="fa-solid fa-circle-check"></i>
-                        <h3 id="statActiveUsers">0</h3>
-                        <p>Active</p>
-                    </div>
-                    <div class="stat-card glass-panel">
-                        <i class="fa-solid fa-ban"></i>
-                        <h3 id="statSuspendedUsers">0</h3>
-                        <p>Suspended</p>
-                    </div>
-                    <div class="stat-card glass-panel">
-                        <i class="fa-solid fa-crown"></i>
-                        <h3 id="statPremiumUsers">0</h3>
-                        <p>Premium</p>
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <h2>Admin Dashboard</h2>
+                            <p>Advanced system control and user management.</p>
+                        </div>
+                        <span class="badge badge-premium">v2.0.9 (PRO)</span>
                     </div>
                 </div>
 
-                <!-- User Management -->
-                <div class="glass-panel" style="padding: 1.5rem;">
-                    <!-- Search Bar -->
-                    <div class="admin-search" style="margin-bottom: 1.5rem;">
-                        <input type="text" id="userSearchInput" placeholder="Search users by name or role..."
-                            onkeyup="filterUsers()" class="module-input" style="width: 100%; padding: 0.75rem;">
+                <!-- Admin Tabs -->
+                <div class="admin-tabs">
+                    <button class="admin-tab-btn active" onclick="switchAdminTab('users')">
+                        <i class="fa-solid fa-users"></i> Users
+                    </button>
+                    <button class="admin-tab-btn" onclick="switchAdminTab('system')">
+                        <i class="fa-solid fa-gears"></i> System Settings
+                    </button>
+                    <button class="admin-tab-btn" onclick="switchAdminTab('stats')">
+                        <i class="fa-solid fa-chart-line"></i> Analytics
+                    </button>
+                </div>
+
+                <!-- Users Section -->
+                <div id="admin-users" class="admin-section active">
+                    <div class="admin-stats">
+                        <div class="stat-card glass-panel">
+                            <i class="fa-solid fa-users"></i>
+                            <h3 id="statTotalUsers">0</h3>
+                            <p>Total Users</p>
+                        </div>
+                        <div class="stat-card glass-panel">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <h3 id="statActiveUsers">0</h3>
+                            <p>Active</p>
+                        </div>
+                        <div class="stat-card glass-panel">
+                            <i class="fa-solid fa-ban"></i>
+                            <h3 id="statSuspendedUsers">0</h3>
+                            <p>Suspended</p>
+                        </div>
+                        <div class="stat-card glass-panel">
+                            <i class="fa-solid fa-crown"></i>
+                            <h3 id="statPremiumUsers">0</h3>
+                            <p>Premium</p>
+                        </div>
                     </div>
 
-                    <table class="user-table">
-                        <thead>
-                            <tr>
-                                <th>User</th>
-                                <th>Status</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="userTableBody">
-                            <!-- User Rows -->
-                        </tbody>
-                    </table>
+                    <div class="input-group glass-panel" style="margin-top: 1.5rem;">
+                        <input type="text" id="userSearchInput" placeholder="Search by username or role..."
+                            onkeyup="filterUsers()" style="margin-bottom: 0;">
+                    </div>
+
+                    <div class="table-responsive glass-panel" style="padding: 1rem; margin-top: 1rem;">
+                        <table class="user-table">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Plan</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userTableBody">
+                                <!-- Users injected here -->
+                            </tbody>
+                        </table>
+                        <p class="text-xs text-muted"
+                            style="margin-top: 1rem; background: rgba(0,0,0,0.2); padding: 0.75rem; border-radius: 8px;">
+                            <i class="fa-solid fa-circle-info"></i> <b>Note:</b> User accounts are stored locally in
+                            your browser.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- System Settings Section -->
+                <div id="admin-system" class="admin-section">
+                    <div class="admin-grid">
+                        <div class="config-card glass-panel">
+                            <h3><i class="fa-solid fa-robot"></i> AI Configuration</h3>
+                            <div class="config-item">
+                                <label>Default AI Model</label>
+                                <select id="adminGlobalModel" class="module-input">
+                                    <option value="openai/gpt-4o-mini">GPT-4o Mini (Fast & Cheap)</option>
+                                    <option value="anthropic/claude-3-haiku">Claude 3 Haiku</option>
+                                    <option value="google/gemini-flash-1.5">Gemini 1.5 Flash</option>
+                                </select>
+                            </div>
+                            <div class="config-item">
+                                <label>Strict Formatting</label>
+                                <select id="adminStrictFormatting" class="module-input">
+                                    <option value="on">Always Enforce Markdown</option>
+                                    <option value="off">Allow Flexible Output</option>
+                                </select>
+                            </div>
+                            <button class="secondary-btn" onclick="saveAdminSettings()">Save System Config</button>
+                        </div>
+
+                        <div class="config-card glass-panel">
+                            <h3><i class="fa-solid fa-shield"></i> Safety & Quotas</h3>
+                            <div class="config-item">
+                                <label>Free Plan Daily Limit</label>
+                                <input type="number" id="adminFreeQuota" value="20" class="module-input">
+                            </div>
+                            <div class="config-item">
+                                <label>Basic Plan Daily Limit</label>
+                                <input type="number" id="adminBasicQuota" value="50" class="module-input">
+                            </div>
+                            <p class="text-xs text-muted">Premium users always have unlimited access.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Section -->
+                <div id="admin-stats" class="admin-section">
+                    <div class="admin-grid">
+                        <div class="stat-card glass-panel" style="text-align: left;">
+                            <h3>Total Messages Processed</h3>
+                            <h1 id="totalSiteMessages" style="font-size: 3rem; color: var(--primary-color);">0</h1>
+                            <div class="usage-progress" style="height: 12px; margin-bottom: 0.5rem;">
+                                <div class="usage-bar"
+                                    style="width: 100%; background: linear-gradient(90deg, var(--primary-color), var(--accent-color));">
+                                </div>
+                            </div>
+                            <p class="text-sm text-muted">Across all local user sessions.</p>
+                        </div>
+
+                        <div class="config-card glass-panel">
+                            <h3>User Retention</h3>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Active Today</span>
+                                <span id="retentionToday">100%</span>
+                            </div>
+                            <div class="usage-progress">
+                                <div class="usage-bar" style="width: 100%;"></div>
+                            </div>
+                            <div
+                                style="display: flex; justify-content: space-between; margin-top: 1rem; margin-bottom: 0.5rem;">
+                                <span>New Logins (Last 24h)</span>
+                                <span id="retentionNew">1</span>
+                            </div>
+                            <div class="usage-progress">
+                                <div class="usage-bar" style="width: 25%; background: var(--accent-color);"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-    </div>
-
-    </div>
-    </main>
+        </main>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="app.js"></script>
