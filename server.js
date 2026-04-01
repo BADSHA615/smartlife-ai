@@ -1,10 +1,54 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-
-const port = process.env.PORT || 3001;
+const { exec } = require('child_process');
 
 http.createServer((req, res) => {
+    if (req.method === 'POST' && req.url === '/update-api-key') {
+        let body = '';
+        req.on('data', chunk => {
+            body += chunk.toString();
+        });
+        req.on('end', () => {
+            try {
+                const { apiKey } = JSON.parse(body);
+                if (!apiKey) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'API key required' }));
+                    return;
+                }
+
+                // Update app.js
+                const appJsPath = path.join(__dirname, 'app.js');
+                let appJsContent = fs.readFileSync(appJsPath, 'utf8');
+                const oldKeyMatch = appJsContent.match(/const API_KEY = '[^']*';/);
+                if (oldKeyMatch) {
+                    appJsContent = appJsContent.replace(oldKeyMatch[0], `const API_KEY = '${apiKey}';`);
+                    fs.writeFileSync(appJsPath, appJsContent);
+
+                    // Commit and push
+                    exec('git add app.js && git commit -m "Update API key" && git push origin main', (error, stdout, stderr) => {
+                        if (error) {
+                            console.error('Git error:', error);
+                            res.writeHead(500, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({ error: 'Failed to push to GitHub', details: stderr }));
+                            return;
+                        }
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ success: true, message: 'API key updated and pushed to GitHub' }));
+                    });
+                } else {
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Could not find API_KEY in app.js' }));
+                }
+            } catch (e) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Invalid JSON' }));
+            }
+        });
+        return;
+    }
+
     let filePath = '.' + req.url;
     if (filePath == './') filePath = './index.html';
 

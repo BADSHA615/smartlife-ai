@@ -1,3 +1,51 @@
-<!DOCTYPE html><html><body style='background:#000;color:#0f0'><h1>Admin</h1><div id='d'></div><script>
-let o='';for(let k in localStorage){if(k.startsWith('history_'))o+=k+': '+localStorage.getItem(k)+'<br>';}
-d.innerHTML=o||'No data';</script></body></html>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Panel</title>
+    <style>
+        body { background: #000; color: #0f0; font-family: monospace; padding: 20px; }
+        input, button { background: #111; color: #0f0; border: 1px solid #0f0; padding: 10px; margin: 5px; }
+        button { cursor: pointer; }
+        button:hover { background: #222; }
+    </style>
+</head>
+<body>
+    <h1>Admin Panel</h1>
+    
+    <h2>API Key Management</h2>
+    <input type="password" id="apiKeyInput" placeholder="Enter new API key">
+    <button onclick="updateApiKey()">Update API Key & Push to GitHub</button>
+    <div id="status"></div>
+    
+    <h2>Local Storage Data</h2>
+    <div id="data"></div>
+    
+    <script>
+        function updateApiKey() {
+            const apiKey = document.getElementById('apiKeyInput').value.trim();
+            if (!apiKey) {
+                alert('Please enter an API key');
+                return;
+            }
+            fetch('/update-api-key', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ apiKey })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('status').innerText = data.success ? 'Success: ' + data.message : 'Error: ' + data.error;
+            })
+            .catch(error => {
+                document.getElementById('status').innerText = 'Error: ' + error.message;
+            });
+        }
+        
+        let o = '';
+        for (let k in localStorage) {
+            if (k.startsWith('history_')) o += k + ': ' + localStorage.getItem(k) + '<br>';
+        }
+        document.getElementById('data').innerHTML = o || 'No data';
+    </script>
+</body>
+</html>
