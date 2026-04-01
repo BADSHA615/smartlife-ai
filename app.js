@@ -1,6 +1,6 @@
 // SmartLife AI - Version 2.0.9
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const API_KEY = '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';
+const API_KEY = '';
 
 // --- State ---
 let currentUser = localStorage.getItem('user');
@@ -1018,7 +1018,7 @@ async function runAI(source) {
     console.log('- Source:', source);
     console.log('- Role:', userRole);
     console.log('- Usage:', messageCount, '/', userQuota);
-    console.log('- Key used:', effectiveKey === API_KEY ? 'DEFAULT_SYSTEM_KEY' : 'CUSTOM_USER_KEY');
+    console.log('- Key used:', localStorage.getItem('custom_api_key') ? 'CUSTOM_USER_KEY' : 'NO_KEY_SET');
     console.log('- Key length:', effectiveKey.length);
 
     if (!effectiveKey) {
