@@ -27,7 +27,7 @@ http.createServer((req, res) => {
                     fs.writeFileSync(appJsPath, appJsContent);
 
                     // Commit and push
-                    exec('git add app.js && git commit -m "Update API key" && git push origin main', (error, stdout, stderr) => {
+                    exec('git add . && git commit -m "Update API key" && git push origin main', (error, stdout, stderr) => {
                         if (error) {
                             console.error('Git error:', error);
                             res.writeHead(500, { 'Content-Type': 'application/json' });
